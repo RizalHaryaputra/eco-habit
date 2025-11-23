@@ -67,6 +67,17 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         holder.cbDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
             habit.setCompleted(isChecked);
         });
+
+        // Logika Ganti Warna Icon/Text Berdasarkan Kategori
+        if (habit.getCategory().contains("Air")) {
+            holder.tvCategory.setTextColor(android.graphics.Color.BLUE);
+        } else if (habit.getCategory().contains("Sampah")) {
+            holder.tvCategory.setTextColor(android.graphics.Color.parseColor("#795548")); // Coklat
+        } else if (habit.getCategory().contains("Energi")) {
+            holder.tvCategory.setTextColor(android.graphics.Color.parseColor("#FF9800")); // Oranye
+        } else {
+            holder.tvCategory.setTextColor(android.graphics.Color.GREEN); // Default Hijau
+        }
     }
 
     @Override
