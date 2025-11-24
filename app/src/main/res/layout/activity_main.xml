@@ -32,6 +32,16 @@
             android:textStyle="bold"
             android:textColor="#FF9800"/>
 
+        <ProgressBar
+            android:id="@+id/progressBarLevel"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#4CAF50"
+            android:layout_marginTop="8dp"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

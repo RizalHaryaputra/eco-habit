@@ -30,12 +30,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.content.SharedPreferences;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rvHabits;
     private HabitAdapter adapter;
     private FloatingActionButton fabAdd;
     private TextView tvScore; // Score
+    private android.widget.ProgressBar progressBar;
 
     public static ArrayList<Habit> globalHabitList = new ArrayList<>();
 
@@ -53,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
         rvHabits = findViewById(R.id.rvHabits);
         fabAdd = findViewById(R.id.fabAdd);
-        tvScore = findViewById(R.id.tvScore); // Pastikan Anda sudah menambah TextView Score di XML
+        tvScore = findViewById(R.id.tvScore);
+        progressBar = findViewById(R.id.progressBarLevel);
 
         if (globalHabitList.isEmpty()) {
             globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
@@ -89,10 +96,18 @@ public class MainActivity extends AppCompatActivity {
         for (Habit h : globalHabitList) {
             if (h.isCompleted()) totalDone++;
         }
-        // Jika TextView Score belum ada di XML, baris ini akan error (NullPointer), hati-hati
+
+        int score = totalDone * 10;
+
+        // Logika Level Up: Setiap 100 poin reset bar tapi level naik (opsional)
+        // Atau buat max 100 saja.
+
         if (tvScore != null) {
-            tvScore.setText("Total Poin: " + (totalDone * 10) + " XP");
+            tvScore.setText("Level Lingkungan: " + score + " XP");
         }
+
+        // Animasi bar
+        progressBar.setProgress(score);
     }
 
     private void showAddDialog() {
@@ -188,6 +203,34 @@ public class MainActivity extends AppCompatActivity {
                 // Set Alarm Tepat Waktu
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
             }
+        }
+    }
+
+    // 1. Method Simpan Data
+    private void saveData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(globalHabitList);
+        editor.putString("habit_list", json);
+        editor.apply();
+    }
+
+    // 2. Method Muat Data
+    private void loadData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("habit_list", null);
+        Type type = new TypeToken<ArrayList<Habit>>() {}.getType();
+
+        if (json != null) {
+            globalHabitList = gson.fromJson(json, type);
+        }
+
+        // Jika data kosong (pertama kali install), isi dummy
+        if (globalHabitList == null || globalHabitList.isEmpty()) {
+            globalHabitList = new ArrayList<>();
+            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
         }
     }
 }
