@@ -34,6 +34,8 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import android.widget.LinearLayout;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         fabAdd = findViewById(R.id.fabAdd);
         tvScore = findViewById(R.id.tvScore);
         progressBar = findViewById(R.id.progressBarLevel);
+        LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
 
         if (globalHabitList.isEmpty()) {
             globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
@@ -73,12 +76,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
+        // 1. Inisialisasi dulu komponen Layout Kosongnya
+        android.widget.LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
+
+        // 2. Buat dulu list-nya (Filter yang belum selesai)
         ArrayList<Habit> activeList = new ArrayList<>();
         for (Habit h : globalHabitList) {
             if (!h.isCompleted()) {
                 activeList.add(h);
             }
         }
+
+        // 3. Baru cek apakah list kosong atau tidak
+        if (activeList.isEmpty()) {
+            rvHabits.setVisibility(View.GONE);     // Sembunyikan List
+            if (layoutEmpty != null) {
+                layoutEmpty.setVisibility(View.VISIBLE); // Munculkan Gambar Kosong
+            }
+        } else {
+            rvHabits.setVisibility(View.VISIBLE);  // Munculkan List
+            if (layoutEmpty != null) {
+                layoutEmpty.setVisibility(View.GONE);    // Sembunyikan Gambar Kosong
+            }
+        }
+
+        // 4. Pasang ke Adapter
         adapter = new HabitAdapter(activeList);
         rvHabits.setLayoutManager(new LinearLayoutManager(this));
         rvHabits.setAdapter(adapter);
