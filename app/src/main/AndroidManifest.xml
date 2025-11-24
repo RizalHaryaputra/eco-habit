@@ -36,7 +36,14 @@
             android:exported="false"
             android:parentActivityName=".WelcomeActivity" />
 
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <receiver android:name=".AlarmReceiver" />
+
+
     </application>
 
 </manifest>

@@ -15,6 +15,7 @@ public class WelcomeActivity extends AppCompatActivity {
         // Inisialisasi Tombol
         Button btnStart = findViewById(R.id.btnGetStarted);
         Button btnHistory = findViewById(R.id.btnHistory);
+        Button btnAboutUs = findViewById(R.id.btnAboutUs);
 
         // 1. AKSI TOMBOL MULAI -> Ke Halaman Input (MainActivity)
         btnStart.setOnClickListener(new View.OnClickListener() {
@@ -33,6 +34,11 @@ public class WelcomeActivity extends AppCompatActivity {
                 Intent intent = new Intent(WelcomeActivity.this, HistoryActivity.class);
                 startActivity(intent);
             }
+        });
+
+        btnAboutUs.setOnClickListener(v -> {
+            Intent intent = new Intent(WelcomeActivity.this, AboutActivity.class);
+            startActivity(intent);
         });
     }
 }

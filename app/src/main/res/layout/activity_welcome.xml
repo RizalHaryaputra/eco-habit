@@ -41,4 +41,12 @@
         android:backgroundTint="@android:color/darker_gray"
         android:textColor="@android:color/white"/>
 
+    <Button
+        android:id="@+id/btnAboutUs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Tentang Tim Pengembang"
+        android:backgroundTint="#546E7A"
+        android:textColor="@android:color/white"/>
 </LinearLayout>
