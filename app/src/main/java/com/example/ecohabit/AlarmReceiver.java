@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,13 +24,22 @@ public class AlarmReceiver extends BroadcastReceiver {
         int habitId = intent.getIntExtra("ID", 0);
         boolean isActionRequired = intent.getBooleanExtra("IS_ACTION", true);
 
-        // --- NEW TEXT FORMAT ---
         String messageBody = (category != null ? category : "Pengingat") + " • Waktunya bertindak!";
 
+        // NAVIGATION STACK LOGIC
+        // 1. Create Intents for both screens
         Intent tapIntent = new Intent(context, MainActivity.class);
-        tapIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context, 0, tapIntent, PendingIntent.FLAG_IMMUTABLE
+        Intent welcomeIntent = new Intent(context, WelcomeActivity.class);
+
+        // 2. Use TaskStackBuilder to stack them: Welcome (Bottom) -> Main (Top)
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addNextIntent(welcomeIntent); // Adds Welcome to the stack first
+        stackBuilder.addNextIntent(tapIntent);     // Adds Main on top of Welcome
+
+        // 3. Generate the PendingIntent from the stack
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "ecohabit_channel")
