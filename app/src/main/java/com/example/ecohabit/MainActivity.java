@@ -46,7 +46,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvScore; // Score
     private android.widget.ProgressBar progressBar;
 
+    // List 1: Active Schedules
     public static ArrayList<Habit> globalHabitList = new ArrayList<>();
+    // List 2: Past Logs (History)
+    public static ArrayList<Habit> globalHistoryList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,8 +145,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateScoreUI() {
         int totalDone = 0;
-        for (Habit h : globalHabitList) {
-            if (h.isCompletedForToday()) totalDone++;
+        // Count total history items for score
+        if (globalHistoryList != null) {
+            totalDone = globalHistoryList.size();
         }
 
 //        int score = totalDone * 10;
@@ -299,8 +303,15 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(globalHabitList);
-        editor.putString("habit_list", json);
+
+        // Save Active List
+        String jsonHabit = gson.toJson(globalHabitList);
+        editor.putString("habit_list", jsonHabit);
+
+        // Save History List
+        String jsonHistory = gson.toJson(globalHistoryList);
+        editor.putString("history_list", jsonHistory);
+
         editor.apply();
     }
 
@@ -308,10 +319,17 @@ public class MainActivity extends AppCompatActivity {
     private void loadData() {
         SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = sharedPreferences.getString("habit_list", null);
         Type type = new TypeToken<ArrayList<Habit>>() {}.getType();
-        if (json != null) globalHabitList = gson.fromJson(json, type);
+
+        // Load Active
+        String jsonHabit = sharedPreferences.getString("habit_list", null);
+        if (jsonHabit != null) globalHabitList = gson.fromJson(jsonHabit, type);
         if (globalHabitList == null) globalHabitList = new ArrayList<>();
+
+        // Load History
+        String jsonHistory = sharedPreferences.getString("history_list", null);
+        if (jsonHistory != null) globalHistoryList = gson.fromJson(jsonHistory, type);
+        if (globalHistoryList == null) globalHistoryList = new ArrayList<>();
     }
 
     // 1. Memunculkan Menu Titik Tiga

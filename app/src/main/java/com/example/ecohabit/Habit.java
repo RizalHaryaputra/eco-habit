@@ -82,6 +82,7 @@ public class Habit {
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
 
+    public String getLastCompletedDate() { return lastCompletedDate; }
     // Helper to format time for display
     public String getFormattedTime() {
         if (isRandom) return "Waktu Acak";

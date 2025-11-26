@@ -53,7 +53,18 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         
         holder.tvTitle.setText(habit.getTitle());
         holder.tvCategory.setText(habit.getCategory());
-        holder.tvDate.setText(habit.getFormattedTime());
+
+        // DATE DISPLAY LOGIC
+        if (isHistoryPage) {
+            // Display Format: "Selesai: 2023-11-26, 08:00"
+            String completedDate = habit.getLastCompletedDate();
+            if (completedDate == null) completedDate = "";
+
+            holder.tvDate.setText("Selesai: " + completedDate + ", " + habit.getFormattedTime());
+        } else {
+            // In Active list, just show alarm time
+            holder.tvDate.setText(habit.getFormattedTime());
+        }
 
         // SWITCH LOGIC (Alarm Activation)
         // Detach listener first to avoid loops
@@ -105,6 +116,12 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
                         habit.setActive(false);
                         holder.swAlarm.setChecked(false);
                     }
+
+                    // Create history snapshot
+                    // We duplicate the habit to the History List
+                    Habit historyItem = new Habit(habit.getTitle(), habit.getCategory(), habit.getHour(), habit.getMinute(), habit.isActionRequired());
+                    historyItem.markAsCompletedToday(); // Sets the date on the snapshot
+                    MainActivity.globalHistoryList.add(historyItem); // Add to history log
 
                     Toast.makeText(holder.itemView.getContext(), "Hebat! Tercatat di Riwayat.", Toast.LENGTH_SHORT).show();
 

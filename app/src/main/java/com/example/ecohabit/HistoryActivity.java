@@ -33,17 +33,18 @@ public class HistoryActivity extends AppCompatActivity {
         if (MainActivity.globalHabitList == null || MainActivity.globalHabitList.isEmpty()) {
             SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
             Gson gson = new Gson();
-            String json = sharedPreferences.getString("habit_list", null);
             Type type = new TypeToken<ArrayList<Habit>>() {}.getType();
 
-            if (json != null) {
-                MainActivity.globalHabitList = gson.fromJson(json, type);
-            }
-
+            // Load active habits list
+            String jsonHabit = sharedPreferences.getString("habit_list", null);
+            if (jsonHabit != null) MainActivity.globalHabitList = gson.fromJson(jsonHabit, type);
             // Avoid NullPointerException if SharedPreferences was empty
-            if (MainActivity.globalHabitList == null) {
-                MainActivity.globalHabitList = new ArrayList<>();
-            }
+            if (MainActivity.globalHabitList == null) MainActivity.globalHabitList = new ArrayList<>();
+
+            // Load history list
+            String jsonHistory = sharedPreferences.getString("history_list", null);
+            if (jsonHistory != null) MainActivity.globalHistoryList = gson.fromJson(jsonHistory, type);
+            if (MainActivity.globalHistoryList == null) MainActivity.globalHistoryList = new ArrayList<>();
         }
     }
 
@@ -53,17 +54,12 @@ public class HistoryActivity extends AppCompatActivity {
         historyList = new ArrayList<>();
 
         // Ambil data yang sudah selesai
-        if (MainActivity.globalHabitList != null) {
-            for (Habit h : MainActivity.globalHabitList) {
-                if (h.isCompletedForToday()) {
-                    historyList.add(h);
-                }
-            }
+        if (MainActivity.globalHistoryList != null) {
+            historyList.addAll(MainActivity.globalHistoryList);
         }
 
         adapter = new HabitAdapter(historyList);
-
-        // PENTING: Aktifkan Mode History agar ikon sampah MUNCUL
+        // Aktifkan Mode History agar ikon sampah MUNCUL
         adapter.setHistoryMode(true);
 
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
@@ -82,9 +78,9 @@ public class HistoryActivity extends AppCompatActivity {
                 .setMessage("Yakin ingin menghapus permanen?")
                 .setIcon(android.R.drawable.ic_dialog_alert) // Ikon peringatan
                 .setPositiveButton("Hapus", (dialog, which) -> {
-                    // 1. Hapus dari database GLOBAL
-                    if (MainActivity.globalHabitList != null) {
-                        MainActivity.globalHabitList.remove(habitToDelete);
+                    // 1. Hapus dari database history global
+                    if (MainActivity.globalHistoryList != null) {
+                        MainActivity.globalHistoryList.remove(habitToDelete);
                     }
 
                     // 2. Hapus dari tampilan saat ini
@@ -104,8 +100,12 @@ public class HistoryActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("EcoHabitData", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(MainActivity.globalHabitList);
-        editor.putString("habit_list", json);
+        // Save both lists to be safe, though we only modified history
+        String jsonHabit = gson.toJson(MainActivity.globalHabitList);
+        editor.putString("habit_list", jsonHabit);
+
+        String jsonHistory = gson.toJson(MainActivity.globalHistoryList);
+        editor.putString("history_list", jsonHistory);
         editor.apply();
     }
 
