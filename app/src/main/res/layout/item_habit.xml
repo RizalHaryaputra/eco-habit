@@ -38,6 +38,38 @@
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"/>
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tvBadgeRepeat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↻ Rutin"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#009688"
+                    android:background="#E0F2F1"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:layout_marginEnd="6dp"/>
+
+                <TextView
+                    android:id="@+id/tvBadgeType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ Aksi"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#EF6C00"
+                    android:background="#FFF3E0"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"/>
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/tvHabitDate"
                 android:layout_width="wrap_content"

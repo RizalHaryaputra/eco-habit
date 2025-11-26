@@ -54,6 +54,32 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         holder.tvTitle.setText(habit.getTitle());
         holder.tvCategory.setText(habit.getCategory());
 
+        // BADGE LOGIC
+        if (isHistoryPage) {
+            // Hide badges in history to keep it clean, or keep them if you prefer
+            holder.tvBadgeRepeat.setVisibility(View.GONE);
+            holder.tvBadgeType.setVisibility(View.GONE);
+        } else {
+            // 1. Repeat Badge
+            if (habit.isRepeating()) {
+                holder.tvBadgeRepeat.setVisibility(View.VISIBLE);
+                holder.tvBadgeRepeat.setText("↻ Rutin");
+            } else {
+                holder.tvBadgeRepeat.setVisibility(View.VISIBLE);
+                holder.tvBadgeRepeat.setText("1x Sekali");
+            }
+
+            // 2. Type Badge
+            holder.tvBadgeType.setVisibility(View.VISIBLE);
+            if (habit.isActionRequired()) {
+                holder.tvBadgeType.setText("⚡ Aksi");
+                holder.tvBadgeType.setTextColor(android.graphics.Color.parseColor("#EF6C00")); // Orange
+            } else {
+                holder.tvBadgeType.setText("ℹ️ Info");
+                holder.tvBadgeType.setTextColor(android.graphics.Color.parseColor("#1976D2")); // Blue
+            }
+        }
+
         // DATE DISPLAY LOGIC
         if (isHistoryPage) {
             // Display Format: "Selesai: 2023-11-26, 08:00"
@@ -199,6 +225,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
     public static class HabitViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvCategory, tvDate;
+        TextView tvBadgeRepeat, tvBadgeType;
         SwitchCompat swAlarm; // Changed from CheckBox
         Button btnDone;       // New Button
         ImageView btnDelete; // Variabel baru untuk ikon sampah
@@ -208,9 +235,11 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
             tvTitle = itemView.findViewById(R.id.tvHabitTitle);
             tvCategory = itemView.findViewById(R.id.tvHabitCategory);
             tvDate = itemView.findViewById(R.id.tvHabitDate);
-            swAlarm = itemView.findViewById(R.id.swAlarm);      // New ID
-            btnDone = itemView.findViewById(R.id.btnDoneAction); // New ID
-            btnDelete = itemView.findViewById(R.id.btnDelete); // Hubungkan dengan XML
+            tvBadgeRepeat = itemView.findViewById(R.id.tvBadgeRepeat);
+            tvBadgeType = itemView.findViewById(R.id.tvBadgeType);
+            swAlarm = itemView.findViewById(R.id.swAlarm);
+            btnDone = itemView.findViewById(R.id.btnDoneAction);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }
