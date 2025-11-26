@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView; // Import ImageView
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -45,9 +47,10 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
     @Override
     public void onBindViewHolder(@NonNull HabitViewHolder holder, int position) {
         Habit habit = habitList.get(position);
+        
         holder.tvTitle.setText(habit.getTitle());
         holder.tvCategory.setText(habit.getCategory());
-        holder.tvDate.setText(habit.getDateTime());
+        holder.tvDate.setText(habit.getFormattedTime());
 
         // LOGIKA TOMBOL SAMPAH
         if (isHistoryPage) {
@@ -63,10 +66,44 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
         // Logic Checkbox
         holder.cbDone.setOnCheckedChangeListener(null);
-        holder.cbDone.setChecked(habit.isCompleted());
-        holder.cbDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            habit.setCompleted(isChecked);
+        holder.cbDone.setChecked(habit.isCompletedForToday());
+        holder.cbDone.setOnClickListener(v -> {
+            boolean isChecked = holder.cbDone.isChecked();
+            habit.setCompletedForToday(isChecked);
+
+            if (isChecked) {
+                // Logic for completing a habit
+                if (!habit.isRepeating()) {
+                    habit.setActive(false); // Disable if single use
+                }
+                Toast.makeText(holder.itemView.getContext(), "Tersimpan di Riwayat!", Toast.LENGTH_SHORT).show();
+
+                // Trigger refresh in MainActivity
+                if (holder.itemView.getContext() instanceof MainActivity) {
+                    ((MainActivity) holder.itemView.getContext()).refreshData();
+                }
+            }
         });
+
+        // LOGIC EDIT (Click Body)
+        if (!isHistoryPage) {
+            holder.itemView.setOnClickListener(v -> {
+                if (holder.itemView.getContext() instanceof MainActivity) {
+                    ((MainActivity) holder.itemView.getContext()).showAddDialog(habit);
+                }
+            });
+        }
+
+        // VISIBILITY & STYLING
+        if (isHistoryPage) {
+            holder.btnDelete.setVisibility(View.VISIBLE);
+            holder.btnDelete.setOnClickListener(v -> {
+                if (deleteListener != null) deleteListener.onDeleteClick(habit);
+            });
+            holder.cbDone.setEnabled(false); // Cannot uncheck in history
+        } else {
+            holder.btnDelete.setVisibility(View.GONE);
+        }
 
         // Logika Ganti Warna Icon/Text Berdasarkan Kategori
         if (habit.getCategory().contains("Air")) {

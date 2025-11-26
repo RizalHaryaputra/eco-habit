@@ -27,9 +27,11 @@ public class HistoryActivity extends AppCompatActivity {
         historyList = new ArrayList<>();
 
         // Ambil data yang sudah selesai
-        for (Habit h : MainActivity.globalHabitList) {
-            if (h.isCompleted()) {
-                historyList.add(h);
+        if (MainActivity.globalHabitList != null) {
+            for (Habit h : MainActivity.globalHabitList) {
+                if (h.isCompletedForToday()) {
+                    historyList.add(h);
+                }
             }
         }
 

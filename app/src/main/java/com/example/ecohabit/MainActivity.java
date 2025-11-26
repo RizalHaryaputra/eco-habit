@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,24 +66,27 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarLevel);
         LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
 
+        loadData();
+
         if (globalHabitList.isEmpty()) {
-            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
-            globalHabitList.add(new Habit("Matikan Lampu", "Hemat Energi", "Hari ini, 12:00"));
+            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", 8, 0, true));
+            globalHabitList.add(new Habit("Matikan Lampu", "Hemat Energi", 12, 0, true));
         }
 
         setupRecyclerView();
+        updateScoreUI();
 
-        fabAdd.setOnClickListener(v -> showAddDialog());
+        fabAdd.setOnClickListener(v -> showAddDialog(null));
     }
 
     private void setupRecyclerView() {
         // 1. Inisialisasi dulu komponen Layout Kosongnya
-        android.widget.LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
+        LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
 
-        // 2. Buat dulu list-nya (Filter yang belum selesai)
+        // 2. Buat dulu list-nya (Filter yang aktif dan belum selesai)
         ArrayList<Habit> activeList = new ArrayList<>();
         for (Habit h : globalHabitList) {
-            if (!h.isCompleted()) {
+            if (h.isActive() && !h.isCompletedForToday()) {
                 activeList.add(h);
             }
         }
@@ -109,122 +113,199 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setupRecyclerView();
-        updateScore();
+        refreshData();
     }
 
-    private void updateScore() {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // SAVE AUTOMATICALLY ON PAUSE
+        saveData();
+    }
+
+    public void refreshData() {
+        saveData();
+        setupRecyclerView();
+        updateScoreUI();
+    }
+
+    private void updateScoreUI() {
         int totalDone = 0;
         for (Habit h : globalHabitList) {
-            if (h.isCompleted()) totalDone++;
+            if (h.isCompletedForToday()) totalDone++;
         }
 
-        int score = totalDone * 10;
-
-        // Logika Level Up: Setiap 100 poin reset bar tapi level naik (opsional)
-        // Atau buat max 100 saja.
+//        int score = totalDone * 10;
+//
+//        // Logika Level Up: Setiap 100 poin reset bar tapi level naik (opsional)
+//        // Atau buat max 100 saja.
+//
+//        if (tvScore != null) {
+//            tvScore.setText("Level Lingkungan: " + score + " XP");
+//        }
 
         if (tvScore != null) {
-            tvScore.setText("Level Lingkungan: " + score + " XP");
+            tvScore.setText("Selesai Hari Ini: " + totalDone);
         }
 
-        // Animasi bar
-        progressBar.setProgress(score);
+//        // Animasi bar
+//        progressBar.setProgress(score);
     }
 
-    private void showAddDialog() {
+    public void showAddDialog(Habit habitToEdit) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Tambah Kebiasaan Baru");
+        builder.setTitle(habitToEdit == null ? "Tambah Kebiasaan" : "Edit Kebiasaan");
 
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_habit, null);
         builder.setView(view);
 
         EditText etTitle = view.findViewById(R.id.etDialogTitle);
         Spinner spCategory = view.findViewById(R.id.spDialogCategory);
-        TextView tvDate = view.findViewById(R.id.tvSelectDate);
+//        TextView tvDate = view.findViewById(R.id.tvSelectDate);
         TextView tvTime = view.findViewById(R.id.tvSelectTime);
+
+        CheckBox cbRepeat = view.findViewById(R.id.cbDialogRepeat);
 
         String[] categories = {"Hemat Energi", "Kurangi Sampah", "Hemat Air", "Transportasi Hijau"};
         ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(adapterSpinner);
 
-        // Calendar untuk menyimpan waktu yang dipilih user
-        Calendar calendar = Calendar.getInstance();
-        final String[] selectedDate = {"Hari ini"};
-        final String[] selectedTime = {"08:00"};
+//        // Calendar untuk menyimpan waktu yang dipilih user
+//        Calendar calendar = Calendar.getInstance();
+//        final String[] selectedDate = {"Hari ini"};
+//        final String[] selectedTime = {"08:00"};
 
-        tvDate.setOnClickListener(v -> {
-            new DatePickerDialog(this, (view1, year, month, dayOfMonth) -> {
-                selectedDate[0] = dayOfMonth + "/" + (month + 1) + "/" + year;
-                tvDate.setText(selectedDate[0]);
+        final int[] selectedTime = {8, 0}; // Hour, Minute
 
-                // Simpan ke Calendar
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+        // PRE-FILL DATA (If Editing)
+        if (habitToEdit != null) {
+            etTitle.setText(habitToEdit.getTitle());
+            selectedTime[0] = habitToEdit.getHour();
+            selectedTime[1] = habitToEdit.getMinute();
+            tvTime.setText(String.format("%02d:%02d", selectedTime[0], selectedTime[1]));
+            if (cbRepeat != null) cbRepeat.setChecked(habitToEdit.isRepeating());
+
+            for(int i=0; i < categories.length; i++) {
+                if(categories[i].equals(habitToEdit.getCategory())) spCategory.setSelection(i);
+            }
+        }
+
+//        tvDate.setOnClickListener(v -> {
+//            new DatePickerDialog(this, (view1, year, month, dayOfMonth) -> {
+//                selectedDate[0] = dayOfMonth + "/" + (month + 1) + "/" + year;
+//                tvDate.setText(selectedDate[0]);
+//
+//                // Simpan ke Calendar
+//                calendar.set(Calendar.YEAR, year);
+//                calendar.set(Calendar.MONTH, month);
+//                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+//            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+//        });
 
         tvTime.setOnClickListener(v -> {
             new TimePickerDialog(this, (view12, hourOfDay, minute) -> {
-                String formattedTime = String.format("%02d:%02d", hourOfDay, minute);
-                selectedTime[0] = formattedTime;
-                tvTime.setText(formattedTime);
-
-                // Simpan ke Calendar
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.set(Calendar.SECOND, 0);
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
+                selectedTime[0] = hourOfDay;
+                selectedTime[1] = minute;
+                tvTime.setText(String.format("%02d:%02d", hourOfDay, minute));
+            }, selectedTime[0], selectedTime[1], true).show();
         });
 
         builder.setPositiveButton("Simpan", (dialog, which) -> {
             String title = etTitle.getText().toString();
             String category = spCategory.getSelectedItem().toString();
-            String fullDateTime = selectedDate[0] + ", " + selectedTime[0];
+//            String fullDateTime = selectedDate[0] + ", " + selectedTime[0];
 
-            if (!title.isEmpty()) {
-                Habit newHabit = new Habit(title, category, fullDateTime);
-                globalHabitList.add(newHabit);
-
-                // --- SET ALARM NOTIFIKASI ---
-                setAlarm(newHabit, calendar.getTimeInMillis());
-
-                setupRecyclerView();
-                Toast.makeText(this, "Pengingat diaktifkan!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Isi nama kebiasaan dulu!", Toast.LENGTH_SHORT).show();
+//            if (!title.isEmpty()) {
+//                Habit newHabit = new Habit(title, category, fullDateTime);
+//                globalHabitList.add(newHabit);
+//
+//                // --- SET ALARM NOTIFIKASI ---
+//                setAlarm(newHabit, calendar.getTimeInMillis());
+//
+//                setupRecyclerView();
+//                Toast.makeText(this, "Pengingat diaktifkan!", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(this, "Isi nama kebiasaan dulu!", Toast.LENGTH_SHORT).show();
+//            }
+            if (title.isEmpty()) {
+                Toast.makeText(this, "Nama harus diisi!", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            if (habitToEdit == null) {
+                // CREATE NEW
+                Habit newHabit = new Habit(title, category, selectedTime[0], selectedTime[1], true);
+                if (cbRepeat != null) newHabit.setRepeating(cbRepeat.isChecked());
+                globalHabitList.add(newHabit);
+                setAlarm(newHabit);
+            } else {
+                // EDIT EXISTING
+                cancelAlarm(habitToEdit); // Cancel old alarm first
+                habitToEdit.setTitle(title);
+                habitToEdit.setCategory(category);
+                habitToEdit.setHour(selectedTime[0]);
+                habitToEdit.setMinute(selectedTime[1]);
+                if (cbRepeat != null) habitToEdit.setRepeating(cbRepeat.isChecked());
+                setAlarm(habitToEdit); // Set new alarm
+            }
+            refreshData();
         });
+
+        if (habitToEdit != null) {
+            builder.setNeutralButton("Hapus", (dialog, which) -> {
+                cancelAlarm(habitToEdit);
+                globalHabitList.remove(habitToEdit);
+                refreshData();
+            });
+        }
 
         builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
         builder.create().show();
     }
 
     // Method Setting Alarm
-    private void setAlarm(Habit habit, long timeInMillis) {
+    private void setAlarm(Habit habit) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
 
         // Kirim Judul & Pesan ke Receiver
         intent.putExtra("TITLE", "Waktunya EcoHabit!");
-        intent.putExtra("MESSAGE", "Jangan lupa: " + habit.getTitle());
+//        intent.putExtra("MESSAGE", "Jangan lupa: " + habit.getTitle());
+        intent.putExtra("ID", habit.getId());
+        intent.putExtra("IS_ACTION", habit.isActionRequired());
 
         // ID Unik agar alarm tidak saling menimpa
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this,
                 habit.getId(),
                 intent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Validasi waktu: Jangan bunyikan alarm jika waktunya sudah lewat
-        if (timeInMillis > System.currentTimeMillis()) {
-            if (alarmManager != null) {
-                // Set Alarm Tepat Waktu
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
-            }
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, habit.getHour());
+        calendar.set(Calendar.MINUTE, habit.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+
+        // If time has passed today, set for tomorrow
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        if (alarmManager != null) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        }
+    }
+
+    private void cancelAlarm(Habit habit) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, habit.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
         }
     }
 
@@ -244,16 +325,14 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = sharedPreferences.getString("habit_list", null);
         Type type = new TypeToken<ArrayList<Habit>>() {}.getType();
+        if (json != null) globalHabitList = gson.fromJson(json, type);
+        if (globalHabitList == null) globalHabitList = new ArrayList<>();
 
-        if (json != null) {
-            globalHabitList = gson.fromJson(json, type);
-        }
-
-        // Jika data kosong (pertama kali install), isi dummy
-        if (globalHabitList == null || globalHabitList.isEmpty()) {
-            globalHabitList = new ArrayList<>();
-            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
-        }
+//        // Jika data kosong (pertama kali install), isi dummy
+//        if (globalHabitList == null || globalHabitList.isEmpty()) {
+//            globalHabitList = new ArrayList<>();
+//            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
+//        }
     }
 
     // 1. Memunculkan Menu Titik Tiga
