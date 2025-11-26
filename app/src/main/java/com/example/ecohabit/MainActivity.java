@@ -84,12 +84,12 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
 
         // 2. Buat dulu list-nya (Filter yang aktif dan belum selesai)
-        ArrayList<Habit> activeList = new ArrayList<>();
-        for (Habit h : globalHabitList) {
-            if (h.isActive() && !h.isCompletedForToday()) {
-                activeList.add(h);
-            }
-        }
+        ArrayList<Habit> activeList = new ArrayList<>(globalHabitList);
+//        for (Habit h : globalHabitList) {
+//            if (h.isActive() && !h.isCompletedForToday()) {
+//                activeList.add(h);
+//            }
+//        }
 
         // 3. Baru cek apakah list kosong atau tidak
         if (activeList.isEmpty()) {
@@ -129,6 +129,17 @@ public class MainActivity extends AppCompatActivity {
         updateScoreUI();
     }
 
+    public void updateAlarmState(Habit habit) {
+        if (habit.isActive()) {
+            setAlarm(habit);
+            Toast.makeText(this, "Pengingat Aktif", Toast.LENGTH_SHORT).show();
+        } else {
+            cancelAlarm(habit);
+            Toast.makeText(this, "Pengingat Mati", Toast.LENGTH_SHORT).show();
+        }
+        saveData();
+    }
+
     private void updateScoreUI() {
         int totalDone = 0;
         for (Habit h : globalHabitList) {
@@ -161,20 +172,13 @@ public class MainActivity extends AppCompatActivity {
 
         EditText etTitle = view.findViewById(R.id.etDialogTitle);
         Spinner spCategory = view.findViewById(R.id.spDialogCategory);
-//        TextView tvDate = view.findViewById(R.id.tvSelectDate);
         TextView tvTime = view.findViewById(R.id.tvSelectTime);
-
         CheckBox cbRepeat = view.findViewById(R.id.cbDialogRepeat);
 
         String[] categories = {"Hemat Energi", "Kurangi Sampah", "Hemat Air", "Transportasi Hijau"};
         ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(adapterSpinner);
-
-//        // Calendar untuk menyimpan waktu yang dipilih user
-//        Calendar calendar = Calendar.getInstance();
-//        final String[] selectedDate = {"Hari ini"};
-//        final String[] selectedTime = {"08:00"};
 
         final int[] selectedTime = {8, 0}; // Hour, Minute
 
@@ -191,18 +195,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-//        tvDate.setOnClickListener(v -> {
-//            new DatePickerDialog(this, (view1, year, month, dayOfMonth) -> {
-//                selectedDate[0] = dayOfMonth + "/" + (month + 1) + "/" + year;
-//                tvDate.setText(selectedDate[0]);
-//
-//                // Simpan ke Calendar
-//                calendar.set(Calendar.YEAR, year);
-//                calendar.set(Calendar.MONTH, month);
-//                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-//            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-//        });
-
         tvTime.setOnClickListener(v -> {
             new TimePickerDialog(this, (view12, hourOfDay, minute) -> {
                 selectedTime[0] = hourOfDay;
@@ -214,20 +206,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Simpan", (dialog, which) -> {
             String title = etTitle.getText().toString();
             String category = spCategory.getSelectedItem().toString();
-//            String fullDateTime = selectedDate[0] + ", " + selectedTime[0];
 
-//            if (!title.isEmpty()) {
-//                Habit newHabit = new Habit(title, category, fullDateTime);
-//                globalHabitList.add(newHabit);
-//
-//                // --- SET ALARM NOTIFIKASI ---
-//                setAlarm(newHabit, calendar.getTimeInMillis());
-//
-//                setupRecyclerView();
-//                Toast.makeText(this, "Pengingat diaktifkan!", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(this, "Isi nama kebiasaan dulu!", Toast.LENGTH_SHORT).show();
-//            }
             if (title.isEmpty()) {
                 Toast.makeText(this, "Nama harus diisi!", Toast.LENGTH_SHORT).show();
                 return;
@@ -247,7 +226,13 @@ public class MainActivity extends AppCompatActivity {
                 habitToEdit.setHour(selectedTime[0]);
                 habitToEdit.setMinute(selectedTime[1]);
                 if (cbRepeat != null) habitToEdit.setRepeating(cbRepeat.isChecked());
-                setAlarm(habitToEdit); // Set new alarm
+                // Reset completion if edited (optional choice)
+                // habitToEdit.resetCompletion();
+
+                // If switch is currently active, reset alarm
+                if (habitToEdit.isActive()) {
+                    setAlarm(habitToEdit);
+                }
             }
             refreshData();
         });
@@ -327,12 +312,6 @@ public class MainActivity extends AppCompatActivity {
         Type type = new TypeToken<ArrayList<Habit>>() {}.getType();
         if (json != null) globalHabitList = gson.fromJson(json, type);
         if (globalHabitList == null) globalHabitList = new ArrayList<>();
-
-//        // Jika data kosong (pertama kali install), isi dummy
-//        if (globalHabitList == null || globalHabitList.isEmpty()) {
-//            globalHabitList = new ArrayList<>();
-//            globalHabitList.add(new Habit("Bawa Botol Minum", "Kurangi Sampah", "Hari ini, 08:00"));
-//        }
     }
 
     // 1. Memunculkan Menu Titik Tiga

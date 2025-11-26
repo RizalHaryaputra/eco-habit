@@ -20,7 +20,7 @@ public class Habit {
     
     // State
     private boolean isActive; // Used to toggle off single-use reminders without deleting
-    private boolean isCompletedForToday;
+    private String lastCompletedDate;
 
     public Habit(String title, String category, int hour, int minute, boolean isActionRequired) {
         // Generate ID acak saat dibuat
@@ -33,9 +33,27 @@ public class Habit {
         
         // Defaults
         this.isActive = true;
-        this.isRepeating = false; 
+        this.isRepeating = true;
         this.isRandom = false;
-        this.isCompletedForToday = false;
+        this.lastCompletedDate = "";
+    }
+
+    // --- LOGIC: Check if completed today ---
+    public boolean isCompletedForToday() {
+        String today = getCurrentDateString();
+        return lastCompletedDate != null && lastCompletedDate.equals(today);
+    }
+
+    public void markAsCompletedToday() {
+        this.lastCompletedDate = getCurrentDateString();
+    }
+
+    // Helper to get today's date "YYYY-MM-DD"
+    private String getCurrentDateString() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.YEAR) + "-" +
+                (calendar.get(Calendar.MONTH) + 1) + "-" +
+                calendar.get(Calendar.DAY_OF_MONTH);
     }
 
     // Getters & Setters
@@ -64,9 +82,6 @@ public class Habit {
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
 
-    public boolean isCompletedForToday() { return isCompletedForToday; }
-    public void setCompletedForToday(boolean completed) { isCompletedForToday = completed; }
-    
     // Helper to format time for display
     public String getFormattedTime() {
         if (isRandom) return "Waktu Acak";

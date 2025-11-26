@@ -23,7 +23,7 @@ public class HabitActionReceiver extends BroadcastReceiver {
             if (MainActivity.globalHabitList != null) {
                 for (Habit h : MainActivity.globalHabitList) {
                     if (h.getId() == habitId) {
-                        h.setCompletedForToday(true);
+                        h.markAsCompletedToday();
 
                         // If NOT repeating, deactivate it so it hides from main list
                         if (!h.isRepeating()) {
