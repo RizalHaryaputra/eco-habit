@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
@@ -24,7 +25,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         int habitId = intent.getIntExtra("ID", 0);
         boolean isActionRequired = intent.getBooleanExtra("IS_ACTION", true);
 
-        String messageBody = (category != null ? category : "Pengingat") + " • Waktunya bertindak!";
+        // EDUCATIONAL NOTIFICATION ENGINE
+        // Instead of a static message, we fetch a random fact
+        String messageBody = (category != null ? category : "Pengingat")+ " • " + getEcoFact(category);
+//        String messageBody = (category != null ? category : "Pengingat") + " • Waktunya bertindak!";
 
         // NAVIGATION STACK LOGIC
         // 1. Create Intents for both screens
@@ -79,6 +83,53 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
 
         notificationManager.notify(habitId, builder.build());
+    }
+
+    // --- HELPER: EDUCATIONAL FACTS GENERATOR ---
+    private String getEcoFact(String category) {
+        if (category == null) return "Waktunya bertindak untuk bumi! 🌱";
+
+        String[] facts;
+
+        switch (category) {
+            case "Hemat Energi":
+                facts = new String[]{
+                        "💡 Tahukah kamu? Mematikan lampu saat keluar ruangan bisa mengurangi emisi karbon signifikan.",
+                        "🔌 Info: Charger yang tidak dicabut tetap menyedot listrik (vampire power). Cabut yuk!",
+                        "🌬️ Tips: Gunakan kipas angin daripada AC, hemat energi hingga 90%!",
+                        "⚡ Fakta: Peralatan elektronik tua memakan daya 50% lebih banyak."
+                };
+                break;
+            case "Kurangi Sampah":
+                facts = new String[]{
+                        "🛍️ Fakta: Kantong plastik butuh 10-1000 tahun untuk terurai. Bawa tas belanjamu sendiri!",
+                        "🥤 Tips: Hindari sedotan plastik, gunakan stainless atau bambu.",
+                        "📄 Info: Kertas bisa didaur ulang hingga 5-7 kali. Jangan langsung buang!",
+                        "🍱 Tips: Bawa tempat makan sendiri (Tumbler/Lunchbox) kurangi sampah styrofoam."
+                };
+                break;
+            case "Hemat Air":
+                facts = new String[]{
+                        "🚰 Fakta: Menutup keran saat sikat gigi bisa hemat 6 liter air per menit!",
+                        "🚿 Tips: Mandi dengan shower lebih hemat air 3x lipat daripada gayung.",
+                        "🌧️ Info: Air hujan bisa ditampung untuk menyiram tanaman. Gratis & ramah lingkungan!",
+                        "💧 Fakta: Keran bocor yang menetes bisa membuang 20 liter air sehari."
+                };
+                break;
+            case "Transportasi Hijau":
+                facts = new String[]{
+                        "🚶 Tips: Jalan kaki 30 menit sehari mengurangi risiko penyakit jantung & polusi.",
+                        "🚌 Fakta: Satu bus penuh bisa menggantikan 40 mobil pribadi di jalan raya.",
+                        "🚲 Tips: Bersepeda ke tempat dekat? Sehat badan, sehat bumi!",
+                        "🚗 Info: Berkendara agresif (rem mendadak/gas pol) boros bensin 30%."
+                };
+                break;
+            default:
+                return "Satu langkah kecilmu berarti besar bagi masa depan bumi. 🌱";
+        }
+
+        // Pick a random fact from the category list
+        return facts[new Random().nextInt(facts.length)];
     }
 
     private void logToHistoryAutomatically(Context context, int habitId, String title) {
