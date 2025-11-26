@@ -194,7 +194,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         } else if (habit.getCategory().contains("Energi")) {
             holder.tvCategory.setTextColor(android.graphics.Color.parseColor("#FF9800")); // Oranye
         } else {
-            holder.tvCategory.setTextColor(android.graphics.Color.GREEN); // Default Hijau
+            holder.tvCategory.setTextColor(android.graphics.Color.parseColor("#078a16")); // Default Hijau
         }
     }
 

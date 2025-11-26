@@ -195,6 +195,39 @@ public class MainActivity extends AppCompatActivity {
                 calendar.get(Calendar.DAY_OF_MONTH));
     }
 
+    private void createDummyData() {
+        // 1. Routine Habit (Action Required, Repeating) - Morning
+        Habit h1 = new Habit("Bawa Botol Minum", "Kurangi Sampah", 7, 0, true);
+        h1.setRepeating(true);
+        h1.setRandom(false);
+        globalHabitList.add(h1);
+        setAlarm(h1);
+
+        // 2. Awareness Reminder (No Action, Random Time) - Energy
+        Habit h2 = new Habit("Matikan lampu", "Hemat Energi", 10, 0, false);
+        h2.setRepeating(true);
+        h2.setRandom(true); // Will trigger randomly between 08:00-20:00
+        globalHabitList.add(h2);
+        setAlarm(h2);
+
+        // 3. One-Time Task (Action Required, No Repeat) - Water
+        Habit h3 = new Habit("Cek Keran Air", "Hemat Air", 7, 30, true);
+        h3.setRepeating(false); // Disappears after doing it once
+        h3.setRandom(false);
+        globalHabitList.add(h3);
+        setAlarm(h3);
+
+        // 4. Transport Habit (Action Required, Repeating) - Afternoon
+        Habit h4 = new Habit("Jalan Kaki ke Kelas Jika Sempat", "Transportasi Hijau", 9, 0, true);
+        h4.setRepeating(true);
+        h4.setRandom(false);
+        globalHabitList.add(h4);
+        setAlarm(h4);
+
+        // Save immediately
+        saveData();
+    }
+
     public void showAddDialog(Habit habitToEdit) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(habitToEdit == null ? "Tambah Kebiasaan" : "Edit Kebiasaan");
@@ -391,7 +424,10 @@ public class MainActivity extends AppCompatActivity {
         // Load Active
         String jsonHabit = sharedPreferences.getString("habit_list", null);
         if (jsonHabit != null) globalHabitList = gson.fromJson(jsonHabit, type);
-        if (globalHabitList == null) globalHabitList = new ArrayList<>();
+        if (globalHabitList == null || globalHabitList.isEmpty()) {
+            globalHabitList = new ArrayList<>();
+            createDummyData();
+        }
 
         // Load History
         String jsonHistory = sharedPreferences.getString("history_list", null);
