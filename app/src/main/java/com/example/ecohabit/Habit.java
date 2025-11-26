@@ -86,7 +86,6 @@ public class Habit {
     public String getLastCompletedDate() { return lastCompletedDate; }
     // Helper to format time for display
     public String getFormattedTime() {
-        if (isRandom) return "Waktu Acak";
         return String.format("%02d:%02d", hour, minute);
     }
 }

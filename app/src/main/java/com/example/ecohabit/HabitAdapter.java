@@ -85,12 +85,15 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
             // Display Format: "Selesai: 2023-11-26, 08:00"
             String completedDate = habit.getLastCompletedDate();
             if (completedDate == null) completedDate = "";
+            holder.tvDate.setTextSize(14);
             holder.tvDate.setText("Selesai: " + completedDate + ", " + habit.getFormattedTime());
+
         } else {
-            // Show "Acak" if it's a random time
             if (habit.isRandom()) {
-                holder.tvDate.setText("Waktu Acak (" + habit.getFormattedTime() + ")");
+                holder.tvDate.setTextSize(20);
+                holder.tvDate.setText("Waktu Acak (08:00 - 20:00)");
             } else {
+                holder.tvDate.setTextSize(28);
                 holder.tvDate.setText(habit.getFormattedTime());
             }
         }
