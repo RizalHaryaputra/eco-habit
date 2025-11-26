@@ -59,11 +59,14 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
             // Display Format: "Selesai: 2023-11-26, 08:00"
             String completedDate = habit.getLastCompletedDate();
             if (completedDate == null) completedDate = "";
-
             holder.tvDate.setText("Selesai: " + completedDate + ", " + habit.getFormattedTime());
         } else {
-            // In Active list, just show alarm time
-            holder.tvDate.setText(habit.getFormattedTime());
+            // Show "Acak" if it's a random time
+            if (habit.isRandom()) {
+                holder.tvDate.setText("Waktu Acak (" + habit.getFormattedTime() + ")");
+            } else {
+                holder.tvDate.setText(habit.getFormattedTime());
+            }
         }
 
         // SWITCH LOGIC (Alarm Activation)
@@ -168,6 +171,9 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
     // Helper: Determine if "Done" button should appear
     private boolean shouldShowDoneButton(Habit habit) {
+        // If Action is NOT required, NEVER show button
+        if (!habit.isActionRequired()) return false;
+
         // 1. Must be Active
         if (!habit.isActive()) return false;
 

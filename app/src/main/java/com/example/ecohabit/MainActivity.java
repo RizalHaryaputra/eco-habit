@@ -35,6 +35,8 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.util.Random;
+
 import android.widget.LinearLayout;
 import android.view.View;
 
@@ -177,7 +179,11 @@ public class MainActivity extends AppCompatActivity {
         EditText etTitle = view.findViewById(R.id.etDialogTitle);
         Spinner spCategory = view.findViewById(R.id.spDialogCategory);
         TextView tvTime = view.findViewById(R.id.tvSelectTime);
+        LinearLayout layoutTimePicker = view.findViewById(R.id.layoutTimePicker);
+
         CheckBox cbRepeat = view.findViewById(R.id.cbDialogRepeat);
+        CheckBox cbAction = view.findViewById(R.id.cbDialogAction);
+        CheckBox cbRandom = view.findViewById(R.id.cbDialogRandom);
 
         String[] categories = {"Hemat Energi", "Kurangi Sampah", "Hemat Air", "Transportasi Hijau"};
         ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
@@ -192,11 +198,28 @@ public class MainActivity extends AppCompatActivity {
             selectedTime[0] = habitToEdit.getHour();
             selectedTime[1] = habitToEdit.getMinute();
             tvTime.setText(String.format("%02d:%02d", selectedTime[0], selectedTime[1]));
+
             if (cbRepeat != null) cbRepeat.setChecked(habitToEdit.isRepeating());
+            if (cbAction != null) cbAction.setChecked(habitToEdit.isActionRequired());
+            if (cbRandom != null) {
+                cbRandom.setChecked(habitToEdit.isRandom());
+                if(habitToEdit.isRandom()) layoutTimePicker.setVisibility(View.GONE);
+            }
 
             for(int i=0; i < categories.length; i++) {
                 if(categories[i].equals(habitToEdit.getCategory())) spCategory.setSelection(i);
             }
+        }
+
+        // LOGIC: Random Checkbox hides Time Picker
+        if (cbRandom != null) {
+            cbRandom.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    layoutTimePicker.setVisibility(View.GONE);
+                } else {
+                    layoutTimePicker.setVisibility(View.VISIBLE);
+                }
+            });
         }
 
         tvTime.setOnClickListener(v -> {
@@ -216,10 +239,26 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            // --- LOGIC: Random Time Generation ---
+            int finalHour = selectedTime[0];
+            int finalMinute = selectedTime[1];
+            boolean isRandom = (cbRandom != null && cbRandom.isChecked());
+
+            if (isRandom) {
+                // Generate random time between 08:00 and 20:00
+                Random r = new Random();
+                finalHour = r.nextInt(12) + 8; // 8 to 19
+                finalMinute = r.nextInt(60);
+            }
+
+            boolean isAction = (cbAction != null && cbAction.isChecked());
+            boolean isRepeat = (cbRepeat != null && cbRepeat.isChecked());
+
             if (habitToEdit == null) {
                 // CREATE NEW
-                Habit newHabit = new Habit(title, category, selectedTime[0], selectedTime[1], true);
-                if (cbRepeat != null) newHabit.setRepeating(cbRepeat.isChecked());
+                Habit newHabit = new Habit(title, category, finalHour, finalMinute, isAction);
+                newHabit.setRepeating(isRepeat);
+                newHabit.setRandom(isRandom);
                 globalHabitList.add(newHabit);
                 setAlarm(newHabit);
             } else {
@@ -227,9 +266,11 @@ public class MainActivity extends AppCompatActivity {
                 cancelAlarm(habitToEdit); // Cancel old alarm first
                 habitToEdit.setTitle(title);
                 habitToEdit.setCategory(category);
-                habitToEdit.setHour(selectedTime[0]);
-                habitToEdit.setMinute(selectedTime[1]);
-                if (cbRepeat != null) habitToEdit.setRepeating(cbRepeat.isChecked());
+                habitToEdit.setHour(finalHour);
+                habitToEdit.setMinute(finalMinute);
+                habitToEdit.setActionRequired(isAction);
+                habitToEdit.setRepeating(isRepeat);
+                habitToEdit.setRandom(isRandom);
                 // Reset completion if edited (optional choice)
                 // habitToEdit.resetCompletion();
 

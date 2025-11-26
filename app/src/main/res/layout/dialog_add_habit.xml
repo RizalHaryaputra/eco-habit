@@ -31,29 +31,47 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Pengaturan Pengingat"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"/>
+
+    <CheckBox
+        android:id="@+id/cbDialogAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Perlu Tindakan (Tombol Selesai)"
+        android:checked="true"
+        android:textSize="14sp"/>
+
+    <CheckBox
+        android:id="@+id/cbDialogRandom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Waktu Acak (Antara 08:00 - 20:00)"
+        android:textSize="14sp"/>
+
+    <CheckBox
+        android:id="@+id/cbDialogRepeat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ulangi Setiap Hari"
+        android:textSize="14sp"
+        android:checked="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Waktu Pelaksanaan"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"/>
 
     <LinearLayout
+        android:id="@+id/layoutTimePicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp">
-
-<!--        <TextView-->
-<!--            android:id="@+id/tvSelectDate"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:padding="10dp"-->
-<!--            android:background="@android:drawable/editbox_background"-->
-<!--            android:text="Pilih Tanggal"-->
-<!--            android:drawableStart="@android:drawable/ic_menu_my_calendar"-->
-<!--            android:drawablePadding="8dp"-->
-<!--            android:gravity="center_vertical"/>-->
-
-<!--        <Space android:layout_width="8dp" android:layout_height="wrap_content"/>-->
 
         <TextView
             android:id="@+id/tvSelectTime"
@@ -67,14 +85,5 @@
             android:gravity="center_vertical"
             android:textSize="16sp"/>
     </LinearLayout>
-
-    <!-- Repeat Checkbox -->
-    <CheckBox
-        android:id="@+id/cbDialogRepeat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ulangi Setiap Hari?"
-        android:textSize="16sp"
-        android:checked="false"/>
 
 </LinearLayout>
