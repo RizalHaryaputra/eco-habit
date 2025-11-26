@@ -300,8 +300,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AlarmReceiver.class);
 
         // Kirim Judul & Pesan ke Receiver
-        intent.putExtra("TITLE", "Waktunya EcoHabit!");
-//        intent.putExtra("MESSAGE", "Jangan lupa: " + habit.getTitle());
+        intent.putExtra("TITLE", habit.getTitle());
+        intent.putExtra("CATEGORY", habit.getCategory());
         intent.putExtra("ID", habit.getId());
         intent.putExtra("IS_ACTION", habit.isActionRequired());
 
