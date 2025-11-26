@@ -51,9 +51,10 @@ public class Habit {
     // Helper to get today's date "YYYY-MM-DD"
     private String getCurrentDateString() {
         Calendar calendar = Calendar.getInstance();
-        return calendar.get(Calendar.YEAR) + "-" +
-                (calendar.get(Calendar.MONTH) + 1) + "-" +
-                calendar.get(Calendar.DAY_OF_MONTH);
+        return String.format(java.util.Locale.US, "%d-%02d-%02d",
+                calendar.get(Calendar.YEAR),
+                (calendar.get(Calendar.MONTH) + 1),
+                calendar.get(Calendar.DAY_OF_MONTH));
     }
 
     // Getters & Setters

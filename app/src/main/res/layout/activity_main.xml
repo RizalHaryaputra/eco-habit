@@ -23,14 +23,31 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvScore"
-            android:layout_width="wrap_content"
+        <!-- LEVEL & XP INFO -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Selesai Hari Ini: 0"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#FF9800"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tvLevel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Level 1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FF9800"/>
+
+            <TextView
+                android:id="@+id/tvScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0/100 XP"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"/>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressBarLevel"
@@ -42,11 +59,16 @@
             android:progressTint="#4CAF50"
             android:layout_marginTop="8dp"/>
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Target hari ini: 0/3 Selesai"-->
-<!--            android:textSize="16sp" />-->
+        <!-- DAILY STATS -->
+        <TextView
+            android:id="@+id/tvDailyStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hari ini: 0x Menyadari Lingkungan"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:textColor="#009688"
+            android:textStyle="italic"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

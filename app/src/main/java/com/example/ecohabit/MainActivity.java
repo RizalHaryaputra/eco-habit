@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,8 +46,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvHabits;
     private HabitAdapter adapter;
     private FloatingActionButton fabAdd;
-    private TextView tvScore; // Score
-    private android.widget.ProgressBar progressBar;
+    private TextView tvScore;
+    private TextView tvLevel;
+    private TextView tvDailyStats;
+    private ProgressBar progressBarLevel;
 
     // List 1: Active Schedules
     public static ArrayList<Habit> globalHabitList = new ArrayList<>();
@@ -68,7 +71,9 @@ public class MainActivity extends AppCompatActivity {
         rvHabits = findViewById(R.id.rvHabits);
         fabAdd = findViewById(R.id.fabAdd);
         tvScore = findViewById(R.id.tvScore);
-        progressBar = findViewById(R.id.progressBarLevel);
+        tvLevel = findViewById(R.id.tvLevel);
+        tvDailyStats = findViewById(R.id.tvDailyStats);
+        progressBarLevel = findViewById(R.id.progressBarLevel);
         LinearLayout layoutEmpty = findViewById(R.id.layoutEmpty);
 
         loadData();
@@ -118,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        loadData();
         refreshData();
     }
 
@@ -146,27 +152,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateScoreUI() {
-        int totalDone = 0;
-        // Count total history items for score
+        int totalHistoryCount = 0;
         if (globalHistoryList != null) {
-            totalDone = globalHistoryList.size();
+            totalHistoryCount = globalHistoryList.size();
         }
 
-//        int score = totalDone * 10;
-//
-//        // Logika Level Up: Setiap 100 poin reset bar tapi level naik (opsional)
-//        // Atau buat max 100 saja.
-//
-//        if (tvScore != null) {
-//            tvScore.setText("Level Lingkungan: " + score + " XP");
-//        }
+        // --- 1. CALCULATE LEVEL & XP ---
+        // Logic: 10 Habits = 1 Level (100 XP)
+        // Each habit worth 10 XP
+        int totalXP = totalHistoryCount * 10;
+        int currentLevel = (totalXP / 100) + 1; // Start at Level 1
+        int currentProgress = totalXP % 100;    // 0 to 99
 
-        if (tvScore != null) {
-            tvScore.setText("Selesai Hari Ini: " + totalDone);
+        if (tvLevel != null) tvLevel.setText("Level " + currentLevel);
+        if (tvScore != null) tvScore.setText(currentProgress + "/100 XP");
+        if (progressBarLevel != null) progressBarLevel.setProgress(currentProgress);
+
+        // --- 2. CALCULATE DAILY STATS ---
+        int dailyCount = 0;
+        String today = getCurrentDateString();
+
+        if (globalHistoryList != null) {
+            for (Habit h : globalHistoryList) {
+                // Check if the history item has a date AND if it matches today
+                if (h.getLastCompletedDate() != null && h.getLastCompletedDate().equals(today)) {
+                    dailyCount++;
+                }
+            }
         }
 
-//        // Animasi bar
-//        progressBar.setProgress(score);
+        if (tvDailyStats != null) {
+            tvDailyStats.setText("Hari ini: " + dailyCount + "x Menyadari Lingkungan");
+        }
+    }
+
+    // Helper to get today's date for comparison
+    private String getCurrentDateString() {
+        Calendar calendar = Calendar.getInstance();
+        return String.format(java.util.Locale.US, "%d-%02d-%02d",
+                calendar.get(Calendar.YEAR),
+                (calendar.get(Calendar.MONTH) + 1),
+                calendar.get(Calendar.DAY_OF_MONTH));
     }
 
     public void showAddDialog(Habit habitToEdit) {
