@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -57,6 +58,8 @@ public class HistoryActivity extends AppCompatActivity {
         if (MainActivity.globalHistoryList != null) {
             historyList.addAll(MainActivity.globalHistoryList);
         }
+
+        Collections.reverse(historyList);
 
         adapter = new HabitAdapter(historyList);
         // Aktifkan Mode History agar ikon sampah MUNCUL
